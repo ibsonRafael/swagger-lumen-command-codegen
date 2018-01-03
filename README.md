@@ -43,11 +43,13 @@ Once modified, you can run this:
 mvn package
 ```
 
+
 In your generator project.  A single jar file will be produced in `target`.  You can now use that with codegen:
 
 ```
 java -cp /path/to/swagger-codegen-cli.jar:/path/to/your.jar io.swagger.codegen.Codegen -l myServerLumenCodegen -i /path/to/swagger.yaml -o ./test
 ```
+
 
 Now your templates are available to the client generator and you can write output values
 
