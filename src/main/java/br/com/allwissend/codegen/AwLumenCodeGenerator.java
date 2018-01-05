@@ -12,8 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AwLumenCodeGenerator extends AbstractPhpCodegen
 {
+    static Logger LOGGER = LoggerFactory.getLogger(AbstractPhpCodegen.class);
+
      @SuppressWarnings("hiding")
     protected String apiVersion = "1.0.0";
 
@@ -34,7 +39,7 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
      * @return the friendly name for the generator
      */
     public String getName() {
-        return "aw-lumen";
+        return "c-lumen";
     }
 
     /**
@@ -52,6 +57,9 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
 
         embeddedTemplateDir = templateDir = "AwLumenCodeGenerator";
 
+        srcBasePath = "backend";
+        String standIs = "command";
+
         /*
          * packPath
          */
@@ -61,12 +69,12 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
         /*
          * Api Package.  Optional, if needed, this can be used in templates
          */
-        apiPackage = "app.Http.Controllers";
+        apiPackage = standIs + "." + "app.Http.Controllers";
 
         /*
          * Model Package.  Optional, if needed, this can be used in templates
          */
-        modelPackage = "models";
+        modelPackage = standIs + "." + "app.Models";
 
         // template files want to be ignored
         modelTemplateFiles.clear();
@@ -75,9 +83,10 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
         modelDocTemplateFiles.clear();
 
         modelTemplateFiles.put("model.mustache", ".php");
-        apiTemplateFiles.put("api.mustache", ".php");
-        apiTestTemplateFiles.put("api_test.mustache", ".php");
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
+
+        apiTemplateFiles.put("apiCommand.mustache", ".php");
+        apiTestTemplateFiles.put("api_test.mustache", ".php");
         apiDocTemplateFiles.put("api_doc.mustache", ".md");
 
         /*
@@ -91,17 +100,36 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
          * entire object tree available.  If the input file has a suffix of `.mustache
          * it will be processed by the template engine.  Otherwise, it will be copied
          */
-        supportingFiles.add(new SupportingFile("composer.mustache", packagePath + File.separator + srcBasePath, "composer.json"));
-        supportingFiles.add(new SupportingFile("readme.md", packagePath + File.separator + srcBasePath, "readme.md"));
-        supportingFiles.add(new SupportingFile("app.php", packagePath + File.separator + srcBasePath + File.separator + "bootstrap", "app.php"));
-        supportingFiles.add(new SupportingFile("index.php", packagePath + File.separator + srcBasePath + File.separator + "public", "index.php"));
-        supportingFiles.add(new SupportingFile("User.php", packagePath + File.separator + srcBasePath + File.separator + "app", "User.php"));
-        supportingFiles.add(new SupportingFile("Kernel.php", packagePath + File.separator + srcBasePath + File.separator + "app"  + File.separator + "Console", "Kernel.php"));
-        supportingFiles.add(new SupportingFile("Handler.php", packagePath + File.separator + srcBasePath + File.separator + "app"  + File.separator + "Exceptions", "Handler.php"));
-        supportingFiles.add(new SupportingFile("routes.mustache", packagePath + File.separator + srcBasePath + File.separator + "app"  + File.separator + "Http", "routes.php"));
+        supportingFiles.add(new SupportingFile("readme.md", packagePath + File.separator + srcBasePath + File.separator + standIs , "readme.md"));
+        supportingFiles.add(new SupportingFile("artisan", packagePath + File.separator + srcBasePath + File.separator + standIs , "artisan"));
+        supportingFiles.add(new SupportingFile(".gitignore", packagePath + File.separator + srcBasePath + File.separator + standIs , ".gitignore"));
+        supportingFiles.add(new SupportingFile("Jenkinsfile.mustache", packagePath + File.separator + srcBasePath + File.separator + standIs, "Jenkinsfile"));
 
-        supportingFiles.add(new SupportingFile("Controller.php", packagePath + File.separator + srcBasePath + File.separator + "app"  + File.separator + "Http" + File.separator + "Controllers" + File.separator, "Controller.php"));
-        supportingFiles.add(new SupportingFile("Authenticate.php", packagePath + File.separator + srcBasePath + File.separator + "app"  + File.separator + "Http" + File.separator + "Middleware" + File.separator, "Authenticate.php"));
+        supportingFiles.add(new SupportingFile("composer.mustache", packagePath + File.separator + srcBasePath + File.separator + standIs, "composer.json"));
+        supportingFiles.add(new SupportingFile(".htaccess", packagePath + File.separator + srcBasePath + File.separator + standIs, ".htaccess"));
+
+        // Config files:
+        String lumenConfigPath = packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "config";
+        supportingFiles.add(new SupportingFile("config.broadcasting.php", lumenConfigPath, "broadcasting.php"));
+        supportingFiles.add(new SupportingFile("config.database.php", lumenConfigPath, "database.php"));
+        supportingFiles.add(new SupportingFile("config.queue.php", lumenConfigPath, "queue.php"));
+
+        supportingFiles.add(new SupportingFile("app.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "bootstrap", "app.php"));
+        supportingFiles.add(new SupportingFile("index.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "public", "index.php"));
+        supportingFiles.add(new SupportingFile("User.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app", "User.php"));
+        supportingFiles.add(new SupportingFile("Kernel.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app"  + File.separator + "Console", "Kernel.php"));
+        supportingFiles.add(new SupportingFile("Handler.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app"  + File.separator + "Exceptions", "Handler.php"));
+        supportingFiles.add(new SupportingFile("routes.mustache", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app"  + File.separator + "Http", "routes.php"));
+
+        supportingFiles.add(new SupportingFile("Controller.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app"  + File.separator + "Http" + File.separator + "Controllers" + File.separator, "Controller.php"));
+        supportingFiles.add(new SupportingFile("Authenticate.php", packagePath + File.separator + srcBasePath + File.separator + standIs + File.separator + "app"  + File.separator + "Http" + File.separator + "Middleware" + File.separator, "Authenticate.php"));
+
+        // Docker
+        String containerPath = packagePath + File.separator + "containers";
+        String dockerBuildPath = containerPath + File.separator + "build";
+
+        supportingFiles.add(new SupportingFile("docker-compose.mustache", packagePath, "docker-compose.yml"));
+        supportingFiles.add(new SupportingFile("Dockerfile.php7",   dockerBuildPath + File.separator + "php7", "Dockerfile"));
 
     }
 
@@ -112,6 +140,19 @@ public class AwLumenCodeGenerator extends AbstractPhpCodegen
         Map<String, Object> objectMap = (Map<String, Object>) objs.get("operations");
         @SuppressWarnings("unchecked")
         List<CodegenOperation> operations = (List<CodegenOperation>) objectMap.get("operation");
+
+        for (Iterator<CodegenOperation> iter = operations.listIterator(); iter.hasNext(); ) {
+            CodegenOperation op = iter.next();
+            op.httpMethod = op.httpMethod.toLowerCase();
+
+            if (op.httpMethod != null && Objects.equals("get",op.httpMethod)) {
+              iter.remove();
+              LOGGER.warn("Removing " + op.path + ":" + op.operationId + ":" + op.httpMethod + " belongs to query.");
+            } else if (op.httpMethod != null && (Objects.equals("head", op.httpMethod) || Objects.equals("options", op.httpMethod))) {
+              iter.remove();
+              LOGGER.warn("Removing " + op.path + ":" + op.operationId + ":" + op.httpMethod + " belongs to query.");
+            }
+        }
 
         for (CodegenOperation op : operations) {
             op.httpMethod = op.httpMethod.toLowerCase();
